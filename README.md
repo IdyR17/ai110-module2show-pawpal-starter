@@ -90,19 +90,31 @@ pytest --cov
 Sample test output:
 
 ```
-# Paste your pytest output here
+tests\test_pawpal.py ..                                                             [100%]
+
+=================================== 2 passed in 0.02s ====================================
 ```
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
-
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Sort by time | `Scheduler.sort_by_time()` | Orders tasks by their `"HH:MM"` time. Tasks with no fixed time go last. |
+| Sort for planning | `Scheduler.generate_plan()`, `Task.priority_rank()` | Highest priority first; shorter tasks first when priorities tie. |
+| Filtering | `Scheduler.filter_tasks(pet_name, completed)` | Filter by pet, by done/not done, or both. |
+| Fit to available time | `Scheduler.generate_plan()`, `Scheduler._first_free_slot()` | Fixed-time tasks keep their slot; flexible tasks go in the earliest free gap. Anything that doesn't fit is skipped with a reason. |
+| Conflict handling | `Scheduler.detect_conflicts()` | Warns when two planned tasks overlap (start + duration), across all pets. Shown under "Conflicts" in `display_plan()`. |
+| Recurring tasks | `Task.mark_complete()`, `Pet.complete_task()`, `Task.is_due()` | Completing a daily/weekly task creates the next one (+1 or +7 days). Only tasks due today are planned. |
+
+**Sorting.** `sort_by_time()` uses `sorted()` with a `lambda` key. Zero-padded `"HH:MM"` strings already sort in clock order, so no time parsing is needed. Task times are checked when a task is created so a value like `"8:30"` can't break the order.
+
+**Filtering.** `filter_tasks()` reads every pet's tasks from `Owner.get_all_tasks()` and keeps the ones that match. Leaving a filter as `None` means "any". `generate_plan()` uses it to set aside completed tasks.
+
+**Planning.** `generate_plan()` takes the unfinished tasks that are due today and sorts them by priority. Tasks with a fixed `time` are placed first, at that time. Flexible tasks then go into the earliest gap starting at `day_start`. Every task counts against the owner's available minutes. It's greedy: it doesn't search for the best combination, but it keeps trying smaller tasks after a big one doesn't fit.
+
+**Conflict detection.** `detect_conflicts()` sorts the planned tasks by start time and checks each one against the tasks after it. If the next task starts before the current one ends, that's a conflict. Because the list is sorted, it can stop checking as soon as a later task starts after the current one ends. Conflicts are warnings only: the plan isn't changed, and the owner decides what to move.
+
+**Recurring tasks.** Each task has a `frequency` (`"once"`, `"daily"`, `"weekly"`) and a `due_date`. `mark_complete()` marks the task done and returns a copy due 1 or 7 days later (counted from today if the task was done late). `Pet.complete_task()` adds that copy to the pet. `generate_plan()` only includes tasks where `is_due(today)` is true, so next week's bath doesn't show up today.
 
 ## 📸 Demo Walkthrough
 

@@ -48,6 +48,10 @@ Yes. After reviewing my first skeleton with AI, I made these suggested changes:
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
 
+My scheduler picks tasks greedily: it sorts by priority (shortest first when priorities tie) and adds each task if it still fits, without trying every combination to find the "best" one. This means a long high-priority task can use up time that could have fit two or three medium-priority tasks. For example, with 40 minutes left, a 40-minute high-priority bath beats two 20-minute medium tasks, even if the owner would have rather done both.
+
+I think this is reasonable because the most important care (meds, feeding, walks) should always come first, even if that means fewer tasks get done. It's also easy to explain to the owner ("this was skipped because only 5 minutes were left"), and it's fast and predictable. Finding the perfect combination would be slower, harder to explain, and not worth it for a handful of tasks a day.
+
 ---
 
 ## 3. AI Collaboration
@@ -57,7 +61,7 @@ Yes. After reviewing my first skeleton with AI, I made these suggested changes:
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
 - What kinds of prompts or questions were most helpful?
 
-I used AI (Claude Code) for most steps: picking the core user actions from the scenario, brainstorming classes, drawing the Mermaid UML, writing the class skeleton, filling in the logic, and writing `main.py` and the first tests. The most helpful prompt was asking it to review its own skeleton for missing relationships and logic bottlenecks. That found real problems, like the plan losing track of which pet a task was for and priorities sorting alphabetically ("high" < "low" < "medium").
+I used AI (Claude Code) for many steps: Brainstorming classes, drawing the Mermaid UML, writing the class skeleton, filling in the logic, and writing `main.py` and the first tests. The most helpful prompt was asking it to review its own skeleton for missing relationships and logic bottlenecks. That found real problems, like the plan losing track of which pet a task was for and priorities sorting alphabetically ("high" < "low" < "medium").
 
 **b. Judgment and verification**
 
@@ -67,9 +71,8 @@ I used AI (Claude Code) for most steps: picking the core user actions from the s
 **Accepted:** the review fixes (the `ScheduledTask` class, `day_start`, number-based priority, and rebuilding the plan from scratch each time), since each one solved a problem I could see in the code.
 
 **Rejected or changed:**
-- The first write-up for my core user actions was too long, so I told the AI to make it simpler.
+
 - When writing tests, the AI also tried to add a `pytest.ini` config file and run the tests right away. I stopped that so I could set up and run the tests myself.
-- The AI said my `git push` would go to CodePath's repo, not mine. I didn't believe it at first because I was logged in to my own GitHub. It showed me with a test push that was denied, and then I pointed the repo at my own fork.
 
 **How I verified:** I ran `main.py` to see the schedule in the terminal and checked that the order, start times, and skipped tasks made sense (for example, the 45-minute bath was skipped when only 10 minutes were left). I also checked that the UML matched the code after each change.
 

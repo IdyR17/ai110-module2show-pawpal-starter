@@ -21,6 +21,7 @@ classDiagram
         +add_task(task: Task) None
         +remove_task(task: Task) None
         +get_tasks() list~Task~
+        +complete_task(task: Task) Task
     }
 
     class Task {
@@ -30,8 +31,11 @@ classDiagram
         +str category
         +str frequency
         +bool completed
+        +str time
+        +date due_date
         +edit(duration_minutes: int, priority: str) None
-        +mark_complete() None
+        +mark_complete() Task
+        +is_due(today: date) bool
         +is_high_priority() bool
         +priority_rank() int
     }
@@ -45,9 +49,14 @@ classDiagram
 
     class Scheduler {
         +Owner owner
+        +date today
         +list~ScheduledTask~ plan
         +list~ScheduledTask~ skipped
+        +sort_by_time(items) list~tuple~
+        +filter_tasks(pet_name: str, completed: bool) list~tuple~
         +generate_plan() list~ScheduledTask~
+        -_first_free_slot(duration_minutes: int) time
+        +detect_conflicts() list~str~
         +explain_plan() str
         +display_plan() str
     }
