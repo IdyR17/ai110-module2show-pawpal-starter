@@ -43,6 +43,8 @@ Yes. After reviewing my first skeleton with AI, I made these suggested changes:
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
 - How did you decide which constraints mattered most?
 
+The scheduler looks at the owner's available minutes, each task's priority, fixed start times, and due dates (so only tasks due today are planned). Time and priority matter most: a busy owner can't go over their time, and things like meds and feeding can't be skipped for a less important task. Preferences are stored but not used yet.
+
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
@@ -76,6 +78,13 @@ I used AI (Claude Code) for many steps: Brainstorming classes, drawing the Merma
 
 **How I verified:** I ran `main.py` to see the schedule in the terminal and checked that the order, start times, and skipped tasks made sense (for example, the 45-minute bath was skipped when only 10 minutes were left). I also checked that the UML matched the code after each change.
 
+**c. AI strategy**
+
+- **Most effective features:** Asking the AI to review its own code found real design problems early. Running `main.py` and the tests right in the editor let me check each step quickly. Having it keep the UML in sync with the code saved a lot of time.
+- **A suggestion I modified:** When I asked how to simplify `generate_plan()`, the AI offered a shorter version using `itertools.accumulate`. It was more "Pythonic" but harder to read and broke the "skip a big task, keep trying smaller ones" behavior. I kept the plain `for` loop and only took the smaller fix (reusing `filter_tasks()`).
+- **Separate chat sessions:** Splitting the work by phase (design, logic, testing, UI) kept each chat focused, so the AI wasn't mixing up old ideas with new ones.
+- **Being the lead architect:** The AI is fast, but I have to set the direction. I decided what to build, said no when answers were too long or did more than I asked, and checked the results myself. AI made a great teammate but I was still the lead.
+
 ---
 
 ## 4. Testing and Verification
@@ -85,10 +94,14 @@ I used AI (Claude Code) for many steps: Brainstorming classes, drawing the Merma
 - What behaviors did you test?
 - Why were these tests important?
 
+I have 23 tests covering sorting by time, filtering by pet or status, daily/weekly recurrence, building the plan, and conflict detection. They include edge cases like a pet with no tasks, two tasks at the same time, and back-to-back tasks (which should not count as a conflict). These matter because they're the parts most likely to break, like a time sorting wrong or a daily task not coming back.
+
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
 - What edge cases would you test next if you had more time?
+
+Fairly confident (4/5). All tests pass. Next I'd test tasks that run past midnight, fixed time tasks that start before the owner's day begins, and the Streamlit UI.
 
 ---
 
@@ -98,10 +111,16 @@ I used AI (Claude Code) for many steps: Brainstorming classes, drawing the Merma
 
 - What part of this project are you most satisfied with?
 
+The scheduler. Fixed-time tasks keep their slot, flexible ones fill the gaps, and every choice comes with a clear reason.
+
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
 
+I'd use owner preferences (like "walks in the morning"), let the app suggest fixes for conflicts instead of just warning, and save data so it isn't lost when the app closes.
+
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+
+Design first, then build. Having a clear UML made it easy to guide the AI and to notice when its suggestions didn't fit the plan.

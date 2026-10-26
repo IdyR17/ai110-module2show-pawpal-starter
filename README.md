@@ -42,60 +42,48 @@ pip install -r requirements.txt
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
 
+## ✨ Features
+
+- **Multiple pets:** one owner can have many pets, and the schedule covers all of them.
+- **Sorting by time:** tasks are listed in clock order. Tasks without a set time go last.
+- **Filtering:** show tasks for one pet, or only tasks that are done or still to do.
+- **Priority planning:** high-priority tasks are scheduled first. If priorities tie, shorter tasks go first so more fit.
+- **Fixed and flexible times:** tasks with a set time keep it. Tasks without one fill the first free gap in the day.
+- **Time limit:** the plan never uses more minutes than the owner has. Tasks that don't fit are skipped with a reason.
+- **Conflict warnings:** if two tasks overlap (even for different pets), the app shows a warning.
+- **Daily and weekly recurrence:** finishing a daily task creates tomorrow's copy; a weekly task comes back in 7 days. Tasks not due yet stay out of today's plan.
+- **Plan explanations:** every task in the plan says why it was scheduled or skipped.
+
 ## 🛠️ Implementation Summary
 
 The logic lives in `pawpal_system.py` and is made of four main classes:
 
-- **Task**: one care activity (walk, feeding, meds...) with a duration, priority, category, frequency, and done/not done status. It rejects bad input like an unknown priority or a zero-minute duration.
-- **Pet**: a pet's details plus its list of tasks. You can add, remove, and list tasks.
+- **Task**: one care activity (walk, feeding, meds...) with a duration, priority, category, how often it repeats, an optional fixed time, a due date, and done/not done status. It rejects bad input like an unknown priority or a zero-minute duration. Completing a daily or weekly task creates its next copy.
+- **Pet**: a pet's details plus its list of tasks. You can add, remove, list, and complete tasks.
 - **Owner**: the owner's name, how many minutes they have today, when their day starts, and their pets. `get_all_tasks()` returns every pet's tasks together, each paired with its pet.
-- **Scheduler**: the "brain". It reads all tasks from `Owner.get_all_tasks()`, sets aside completed ones, sorts the rest by priority (shorter first on ties), and fits them into the owner's time starting at `day_start`. Tasks that don't fit are skipped with a reason.
+- **Scheduler**: the "brain". It reads all tasks from `Owner.get_all_tasks()`, keeps the ones due today, and sorts them by priority. Fixed-time tasks keep their time, and flexible tasks fill the first free gap after `day_start`. Tasks that don't fit are skipped with a reason. It can also sort and filter tasks, and warn about overlapping tasks.
 
-A small helper class, **ScheduledTask**, holds one entry in the plan: the pet, the task, its start time, and why it was scheduled or skipped. `display_plan()` prints the timed schedule and `explain_plan()` prints the reasons.
+A small helper class, **ScheduledTask**, holds one entry in the plan: the pet, the task, its start time, and why it was scheduled or skipped. `display_plan()` prints the timed schedule and any conflicts, and `explain_plan()` prints the reasons.
 
 `main.py` builds a sample owner with two pets and prints the plan, as shown below.
 
 ## 🖥️ Sample Output
 
-Output from running `python main.py`:
+The schedule part of `python main.py` (the full output is in the Demo Walkthrough below):
 
 ```
 === Today's Schedule ===
 Daily plan for Sam:
-  07:30 - Allergy meds for Mochi (5 min) [priority: high]
-  07:35 - Breakfast for Mochi (10 min) [priority: high]
-  07:45 - Morning walk for Biscuit (30 min) [priority: high]
-  08:15 - Laser pointer play for Mochi (20 min) [priority: medium]
-  08:35 - Brushing for Biscuit (15 min) [priority: low]
-
-=== Why this plan ===
-Scheduled Allergy meds for Mochi: high priority, fits in the 90 min left.
-Scheduled Breakfast for Mochi: high priority, fits in the 85 min left.
-Scheduled Morning walk for Biscuit: high priority, fits in the 75 min left.
-Scheduled Laser pointer play for Mochi: medium priority, fits in the 45 min left.
-Scheduled Brushing for Biscuit: low priority, fits in the 25 min left.
-Skipped Bath for Biscuit: needs 45 min but only 10 min left.
+  07:30 - Morning walk for Biscuit (30 min) [priority: high]
+  07:45 - Breakfast for Mochi (10 min) [priority: high]
+  08:00 - Brushing for Biscuit (15 min) [priority: low]
+  12:30 - Laser pointer play for Mochi (20 min) [priority: medium]
+  18:00 - Evening walk for Biscuit (30 min) [priority: high]
+Conflicts:
+  ! Morning walk (Biscuit) 07:30-08:00 overlaps Breakfast (Mochi) at 07:45
 ```
 
 ## 🧪 Testing PawPal+
-
-```bash
-# Run the full test suite:
-pytest
-
-# Run with coverage:
-pytest --cov
-```
-
-Sample test output:
-
-```
-tests\test_pawpal.py ..                                                             [100%]
-
-=================================== 2 passed in 0.02s ====================================
-```
-
-## Testing PawPal+
 
 Run the tests with:
 
@@ -142,12 +130,66 @@ tests\test_pawpal.py .......................                             [100%]
 
 ## 📸 Demo Walkthrough
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+Start the app with `streamlit run app.py`.
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+**What you can do in the app**
+
+- **Owner:** set your name, how many minutes you have today, and when your day starts.
+- **Pets:** add pets with a name, species, and age.
+- **Tasks:** add a task to a pet with a duration, priority, category, how often it repeats, and (optionally) a fixed start time.
+- **Task list:** see all tasks sorted by time, filter by pet or by done/to do, and mark a task complete.
+- **Build Schedule:** generate today's plan and see the times, any conflicts, skipped tasks, and why each task was chosen.
+
+**Example workflow**
+
+1. Set the owner to "Sam" with 120 minutes, starting at 07:30.
+2. Add two pets: Biscuit (dog) and Mochi (cat).
+3. Give Biscuit a "Morning walk" (30 min, high, fixed at 07:30) and Mochi a "Breakfast" (10 min, high, fixed at 07:45).
+4. Add a flexible "Brushing" task for Biscuit (15 min, low).
+5. Check the task list: tasks appear in time order, with Brushing last because it has no fixed time.
+6. Click **Generate schedule**. The walk and breakfast keep their times, Brushing goes into the first free gap (08:00), and a warning appears because the walk (07:30–08:00) overlaps breakfast.
+7. Mark Mochi's breakfast complete. Because it's a daily task, a new copy appears in the list, due tomorrow.
+
+**Scheduler behaviors shown**
+
+- Sorting by time in the task list.
+- Filtering by pet and status.
+- Fixed-time tasks keeping their slot, with flexible tasks filling the gaps.
+- Conflict warnings for overlapping tasks.
+- Daily recurrence when a task is marked complete.
+
+**Sample CLI output from `python main.py`** (shortened):
+
+```
+Completed Allergy meds; next one due 2026-10-27
+
+=== Sorted by time ===
+  07:30  Morning walk for Biscuit [todo, due 2026-10-26]
+  07:45  Breakfast for Mochi [todo, due 2026-10-26]
+  08:00  Allergy meds for Mochi [done, due 2026-10-26]
+  08:00  Allergy meds for Mochi [todo, due 2026-10-27]
+  12:30  Laser pointer play for Mochi [todo, due 2026-10-26]
+  18:00  Evening walk for Biscuit [todo, due 2026-10-26]
+  --:--  Brushing for Biscuit [todo, due 2026-10-26]
+  --:--  Bath for Biscuit [todo, due 2026-10-29]
+
+=== Today's Schedule ===
+Daily plan for Sam:
+  07:30 - Morning walk for Biscuit (30 min) [priority: high]
+  07:45 - Breakfast for Mochi (10 min) [priority: high]
+  08:00 - Brushing for Biscuit (15 min) [priority: low]
+  12:30 - Laser pointer play for Mochi (20 min) [priority: medium]
+  18:00 - Evening walk for Biscuit (30 min) [priority: high]
+Conflicts:
+  ! Morning walk (Biscuit) 07:30-08:00 overlaps Breakfast (Mochi) at 07:45
+
+=== Why this plan ===
+Scheduled Morning walk for Biscuit: fixed time, high priority, fits in the 80 min left.
+Scheduled Breakfast for Mochi: fixed time, high priority, fits in the 120 min left.
+Scheduled Brushing for Biscuit: low priority, first free slot, fits in the 30 min left.
+Scheduled Laser pointer play for Mochi: fixed time, medium priority, fits in the 50 min left.
+Scheduled Evening walk for Biscuit: fixed time, high priority, fits in the 110 min left.
+Skipped Allergy meds for Mochi: already completed.
+```
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

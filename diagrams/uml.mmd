@@ -1,5 +1,5 @@
 classDiagram
-    %% Keep this file updated so it matches your final implementation.
+    %% Final design, matching pawpal_system.py. See uml_initial.mmd for the original design.
 
     class Owner {
         +str name
@@ -21,7 +21,7 @@ classDiagram
         +add_task(task: Task) None
         +remove_task(task: Task) None
         +get_tasks() list~Task~
-        +complete_task(task: Task) Task
+        +complete_task(task: Task, today: date) Task
     }
 
     class Task {
@@ -34,7 +34,7 @@ classDiagram
         +str time
         +date due_date
         +edit(duration_minutes: int, priority: str) None
-        +mark_complete() Task
+        +mark_complete(today: date) Task
         +is_due(today: date) bool
         +is_high_priority() bool
         +priority_rank() int
@@ -55,15 +55,21 @@ classDiagram
         +sort_by_time(items) list~tuple~
         +filter_tasks(pet_name: str, completed: bool) list~tuple~
         +generate_plan() list~ScheduledTask~
-        -_first_free_slot(duration_minutes: int) time
         +detect_conflicts() list~str~
         +explain_plan() str
         +display_plan() str
+        -_first_free_slot(duration_minutes: int) time
+        -_at(t: time) datetime
     }
 
-    Owner "1" --> "1..*" Pet : has
-    Pet "1" --> "0..*" Task : has
-    Scheduler --> Owner : plans for
+    note for Owner "get_all_tasks() returns (Pet, Task) pairs.\npreferences is stored but not used yet."
+    note for Task "time is a fixed 'HH:MM' start, or None if flexible.\nfrequency is 'once', 'daily', or 'weekly'."
+
+    Owner "1" *-- "0..*" Pet : owns
+    Pet "1" *-- "0..*" Task : owns
+    Pet ..> Task : complete_task() calls mark_complete()
+    Task ..> Task : mark_complete() creates next occurrence
+    Scheduler --> Owner : reads get_all_tasks()
     Scheduler "1" --> "0..*" ScheduledTask : creates
     ScheduledTask --> Pet : for
     ScheduledTask --> Task : wraps
