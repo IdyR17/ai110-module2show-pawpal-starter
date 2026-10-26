@@ -27,7 +27,7 @@ I kept the planning in its own Scheduler class so the other three classes just h
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
 
-Yes. After reviewing my first skeleton, I made these changes:
+Yes. After reviewing my first skeleton with AI, I made these suggested changes:
 
 - **Added a `ScheduledTask` class.** It links a task to its pet, a start time, and a reason. Before, the plan was just a list of tasks, so it lost which pet each task was for and had nowhere to store times.
 - **Added `day_start` to Owner.** The scheduler needs to know when the day begins to give tasks real start times.
@@ -57,10 +57,21 @@ Yes. After reviewing my first skeleton, I made these changes:
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
 - What kinds of prompts or questions were most helpful?
 
+I used AI (Claude Code) for most steps: picking the core user actions from the scenario, brainstorming classes, drawing the Mermaid UML, writing the class skeleton, filling in the logic, and writing `main.py` and the first tests. The most helpful prompt was asking it to review its own skeleton for missing relationships and logic bottlenecks. That found real problems, like the plan losing track of which pet a task was for and priorities sorting alphabetically ("high" < "low" < "medium").
+
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
 - How did you evaluate or verify what the AI suggested?
+
+**Accepted:** the review fixes (the `ScheduledTask` class, `day_start`, number-based priority, and rebuilding the plan from scratch each time), since each one solved a problem I could see in the code.
+
+**Rejected or changed:**
+- The first write-up for my core user actions was too long, so I told the AI to make it simpler.
+- When writing tests, the AI also tried to add a `pytest.ini` config file and run the tests right away. I stopped that so I could set up and run the tests myself.
+- The AI said my `git push` would go to CodePath's repo, not mine. I didn't believe it at first because I was logged in to my own GitHub. It showed me with a test push that was denied, and then I pointed the repo at my own fork.
+
+**How I verified:** I ran `main.py` to see the schedule in the terminal and checked that the order, start times, and skipped tasks made sense (for example, the 45-minute bath was skipped when only 10 minutes were left). I also checked that the UML matched the code after each change.
 
 ---
 

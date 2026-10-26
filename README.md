@@ -42,16 +42,39 @@ pip install -r requirements.txt
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
 
+## 🛠️ Implementation Summary
+
+The logic lives in `pawpal_system.py` and is made of four main classes:
+
+- **Task**: one care activity (walk, feeding, meds...) with a duration, priority, category, frequency, and done/not done status. It rejects bad input like an unknown priority or a zero-minute duration.
+- **Pet**: a pet's details plus its list of tasks. You can add, remove, and list tasks.
+- **Owner**: the owner's name, how many minutes they have today, when their day starts, and their pets. `get_all_tasks()` returns every pet's tasks together, each paired with its pet.
+- **Scheduler**: the "brain". It reads all tasks from `Owner.get_all_tasks()`, sets aside completed ones, sorts the rest by priority (shorter first on ties), and fits them into the owner's time starting at `day_start`. Tasks that don't fit are skipped with a reason.
+
+A small helper class, **ScheduledTask**, holds one entry in the plan: the pet, the task, its start time, and why it was scheduled or skipped. `display_plan()` prints the timed schedule and `explain_plan()` prints the reasons.
+
+`main.py` builds a sample owner with two pets and prints the plan, as shown below.
+
 ## 🖥️ Sample Output
 
-Paste a sample of your app's CLI or Streamlit output here so a reader can see what a generated plan looks like:
+Output from running `python main.py`:
 
 ```
-# e.g.:
-# Daily plan for Biscuit (Golden Retriever):
-#   08:00 — Morning walk (30 min) [priority: high]
-#   09:00 — Feeding (10 min) [priority: high]
-#   ...
+=== Today's Schedule ===
+Daily plan for Sam:
+  07:30 - Allergy meds for Mochi (5 min) [priority: high]
+  07:35 - Breakfast for Mochi (10 min) [priority: high]
+  07:45 - Morning walk for Biscuit (30 min) [priority: high]
+  08:15 - Laser pointer play for Mochi (20 min) [priority: medium]
+  08:35 - Brushing for Biscuit (15 min) [priority: low]
+
+=== Why this plan ===
+Scheduled Allergy meds for Mochi: high priority, fits in the 90 min left.
+Scheduled Breakfast for Mochi: high priority, fits in the 85 min left.
+Scheduled Morning walk for Biscuit: high priority, fits in the 75 min left.
+Scheduled Laser pointer play for Mochi: medium priority, fits in the 45 min left.
+Scheduled Brushing for Biscuit: low priority, fits in the 25 min left.
+Skipped Bath for Biscuit: needs 45 min but only 10 min left.
 ```
 
 ## 🧪 Testing PawPal+
