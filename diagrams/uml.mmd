@@ -4,6 +4,7 @@ classDiagram
     class Owner {
         +str name
         +int available_minutes
+        +time day_start
         +list~str~ preferences
         +list~Pet~ pets
         +add_pet(pet: Pet) None
@@ -31,13 +32,21 @@ classDiagram
         +edit(duration_minutes: int, priority: str) None
         +mark_complete() None
         +is_high_priority() bool
+        +priority_rank() int
+    }
+
+    class ScheduledTask {
+        +Pet pet
+        +Task task
+        +time start_time
+        +str reason
     }
 
     class Scheduler {
         +Owner owner
-        +list~Task~ plan
-        +list~Task~ skipped
-        +generate_plan() list~Task~
+        +list~ScheduledTask~ plan
+        +list~ScheduledTask~ skipped
+        +generate_plan() list~ScheduledTask~
         +explain_plan() str
         +display_plan() str
     }
@@ -45,4 +54,6 @@ classDiagram
     Owner "1" --> "1..*" Pet : has
     Pet "1" --> "0..*" Task : has
     Scheduler --> Owner : plans for
-    Scheduler ..> Task : schedules
+    Scheduler "1" --> "0..*" ScheduledTask : creates
+    ScheduledTask --> Pet : for
+    ScheduledTask --> Task : wraps

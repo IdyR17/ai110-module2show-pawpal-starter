@@ -1,6 +1,11 @@
 """PawPal+ logic layer: backend classes for owners, pets, tasks, and scheduling."""
 
 from dataclasses import dataclass, field
+from datetime import time
+
+# Higher number = more important. Used for sorting, since "high"/"medium"/"low"
+# sort alphabetically in the wrong order.
+PRIORITY_RANK = {"low": 1, "medium": 2, "high": 3}
 
 
 @dataclass
@@ -14,6 +19,10 @@ class Task:
     frequency: str = "daily"  # "daily" or "weekly"
     completed: bool = False
 
+    def __post_init__(self) -> None:
+        """Check that priority is one of PRIORITY_RANK's keys."""
+        pass
+
     def edit(self, duration_minutes: int | None = None, priority: str | None = None) -> None:
         """Update the task's duration and/or priority."""
         pass
@@ -24,6 +33,10 @@ class Task:
 
     def is_high_priority(self) -> bool:
         """Return True if this task has high priority."""
+        pass
+
+    def priority_rank(self) -> int:
+        """Return the task's priority as a number from PRIORITY_RANK."""
         pass
 
 
@@ -55,6 +68,7 @@ class Owner:
 
     name: str
     available_minutes: int = 60
+    day_start: time = time(8, 0)  # when the first task can begin
     preferences: list[str] = field(default_factory=list)
     pets: list[Pet] = field(default_factory=list)
 
@@ -71,22 +85,32 @@ class Owner:
         pass
 
 
+@dataclass
+class ScheduledTask:
+    """A task placed in the plan, linked to its pet and a start time."""
+
+    pet: Pet
+    task: Task
+    start_time: time | None = None  # None for skipped tasks
+    reason: str = ""  # why it was scheduled or skipped
+
+
 class Scheduler:
     """Builds a daily care plan from an owner's pets and tasks."""
 
     def __init__(self, owner: Owner) -> None:
         self.owner = owner
-        self.plan: list[Task] = []
-        self.skipped: list[Task] = []
+        self.plan: list[ScheduledTask] = []
+        self.skipped: list[ScheduledTask] = []
 
-    def generate_plan(self) -> list[Task]:
-        """Pick and order tasks that fit in the owner's available time."""
+    def generate_plan(self) -> list[ScheduledTask]:
+        """Rebuild the plan from scratch: clear plan/skipped, then fit tasks into the owner's time."""
         pass
 
     def explain_plan(self) -> str:
-        """Explain why each task was scheduled or skipped."""
+        """Explain why each task was scheduled or skipped. Call generate_plan() first."""
         pass
 
     def display_plan(self) -> str:
-        """Return the plan formatted for display."""
+        """Return the plan formatted for display. Call generate_plan() first."""
         pass

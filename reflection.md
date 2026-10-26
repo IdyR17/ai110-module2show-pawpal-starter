@@ -13,10 +13,26 @@ Core user actions:
 2. Add or edit care tasks, each with a duration and priority.
 3. Generate today's plan and see why each task was chosen.
 
+My UML has four classes. An Owner has pets, each Pet has tasks, and the Scheduler uses all of that to build the daily plan.
+
+- **Owner**: holds the owner's name, how much time they have today, their preferences, and their pets. It can add pets and update the available time.
+- **Pet**: holds the pet's name, species, age, and its list of care tasks. It can add, remove, and list tasks.
+- **Task**: one care activity, like a walk or feeding. It holds the title, how long it takes, priority, category, how often it happens, and whether it's done. It can be edited or marked complete.
+- **Scheduler**: does the planning. It looks at the owner's pets and tasks, picks the most important ones that fit in the available time, and explains why it chose or skipped each task.
+
+I kept the planning in its own Scheduler class so the other three classes just hold data. That makes the scheduling easier to change and test.
+
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
+
+Yes. After reviewing my first skeleton, I made these changes:
+
+- **Added a `ScheduledTask` class.** It links a task to its pet, a start time, and a reason. Before, the plan was just a list of tasks, so it lost which pet each task was for and had nowhere to store times.
+- **Added `day_start` to Owner.** The scheduler needs to know when the day begins to give tasks real start times.
+- **Added a priority ranking (low = 1, medium = 2, high = 3).** Priorities are text, and sorting text puts "high" before "low" before "medium", which is wrong. Numbers sort correctly.
+- **Made `generate_plan()` rebuild the plan from scratch each time.** Streamlit reruns the code on every click, so without this the plan would fill up with duplicate tasks.
 
 ---
 
