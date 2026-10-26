@@ -95,6 +95,30 @@ tests\test_pawpal.py ..                                                         
 =================================== 2 passed in 0.02s ====================================
 ```
 
+## Testing PawPal+
+
+Run the tests with:
+
+```bash
+python -m pytest
+```
+
+The tests cover sorting tasks by time, filtering by pet or status, recurring daily/weekly tasks, building the daily plan, and conflict detection. They include edge cases like a pet with no tasks, two tasks at the same time, and back-to-back tasks.
+
+```
+============================= test session starts =============================
+platform win32 -- Python 3.14.7, pytest-9.1.1, pluggy-1.7.0
+rootdir: D:\Projects\codepath\ai110-module2show-pawpal-starter
+plugins: anyio-4.15.1
+collected 23 items
+
+tests\test_pawpal.py .......................                             [100%]
+
+============================= 23 passed in 0.03s ==============================
+```
+
+**Confidence level: ⭐⭐⭐⭐☆ (4/5)**. All tests pass, but the Streamlit UI isn't tested automatically, and tasks that run past midnight aren't handled yet.
+
 ## 📐 Smarter Scheduling
 
 | Feature | Method(s) | Notes |

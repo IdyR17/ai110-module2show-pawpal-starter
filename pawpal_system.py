@@ -42,14 +42,14 @@ class Task:
             _check_priority(priority)
             self.priority = priority
 
-    def mark_complete(self) -> "Task | None":
+    def mark_complete(self, today: date | None = None) -> "Task | None":
         """Mark this task as done; for a daily/weekly task, return its next occurrence."""
         self.completed = True
         days = FREQUENCY_DAYS[self.frequency]
         if days is None:
             return None
         # Count from today if the task was done late, so the next one isn't already overdue.
-        next_due = max(self.due_date, date.today()) + timedelta(days=days)
+        next_due = max(self.due_date, today or date.today()) + timedelta(days=days)
         return replace(self, completed=False, due_date=next_due)
 
     def is_due(self, today: date) -> bool:
@@ -109,9 +109,9 @@ class Pet:
         """Return all tasks for this pet."""
         return list(self.tasks)
 
-    def complete_task(self, task: Task) -> Task | None:
+    def complete_task(self, task: Task, today: date | None = None) -> Task | None:
         """Mark a task done and, if it repeats, add its next occurrence to this pet."""
-        next_task = task.mark_complete()
+        next_task = task.mark_complete(today)
         if next_task is not None:
             self.add_task(next_task)
         return next_task
